@@ -1,0 +1,12 @@
+.classpath
+.settings/
+.project
+bin/
+*.class
+out/
+.idea/
+*.iml
+.DS_STORE
+.env
+Test.java
+target/
