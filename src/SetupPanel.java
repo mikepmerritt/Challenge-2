@@ -12,9 +12,11 @@ import javax.swing.JTextField;
 
 public class SetupPanel extends JPanel {
 	public SetupPanel() {
-		this.setPreferredSize(new Dimension(400, 150));
+		this.setPreferredSize(new Dimension(400, 250));
 		
-		JLabel instructions = new JLabel("Please input your GitHub API token.");
+		JLabel usernameInstructions = new JLabel("Please input your GitHub username.");
+		JTextField usernameField = new JTextField(25);
+		JLabel tokenInstructions = new JLabel("Please input your GitHub API token.");
 		JTextField tokenField = new JTextField(25);
 		JButton enterButton = new JButton("Save and Submit");
 		enterButton.addActionListener(new ActionListener() {
@@ -22,16 +24,20 @@ public class SetupPanel extends JPanel {
 			public void actionPerformed(ActionEvent e) {
 				try {
 					PrintWriter output = new PrintWriter(new FileOutputStream("token.txt", true));
+					output.println(usernameField.getText());
 		            output.println(tokenField.getText());
 		            output.close();
 				}
 				catch (FileNotFoundException ex) {
 					System.out.println("An error occurred, exiting program. Please manually add your token to a file named \"token.txt\" in the correct folder.");
 				}
+				System.exit(0);
 			}
 		});
 		
-		this.add(instructions);
+		this.add(usernameInstructions);
+		this.add(usernameField);
+		this.add(tokenInstructions);
 		this.add(tokenField);
 		this.add(enterButton);
 	}
