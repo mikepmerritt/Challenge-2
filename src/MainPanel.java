@@ -7,8 +7,10 @@ import javax.swing.JPanel;
 
 public class MainPanel extends JPanel {
 	
+	// these components can change during runtime, so they can't be declared in the constructor like the others
 	private JLabel selectedUser;
 	
+	// set up the panel and its components
 	public MainPanel() {
 		super(new GridLayout(5, 1));
 		this.setPreferredSize(new Dimension(400, 600));
@@ -34,6 +36,7 @@ public class MainPanel extends JPanel {
 		// other buttons
 	}
 	
+	// this updates all of the components that can be updated (the ones not declared in the constructor)
 	public void updateWindow() {
 		selectedUser.setText("Logged in as " + Driver.getUsername());
 	}

@@ -7,6 +7,7 @@ public class MainWindow extends JFrame {
 	private MainPanel mainPanel;
 	private GitHubApiClient gitHubApiClient;
 	
+	// make the window
 	public MainWindow() {
 		super("GitHub Helper");
 		this.setSize(400, 600);
@@ -15,10 +16,12 @@ public class MainWindow extends JFrame {
 		this.setVisible(false);
 	}
 	
+	// get an instance of the GitHubApiClient we made earlier so we can use it later
 	public void setGitHubApiClient(GitHubApiClient gitHubApiClient) {
 		this.gitHubApiClient = gitHubApiClient;
 	}
 	
+	// update the window and make it visible again
 	public void setVisibility(boolean visibility) {
 		mainPanel.updateWindow();
 		this.setVisible(visibility);
