@@ -11,7 +11,7 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 
 public class SetupPanel extends JPanel {
-	public SetupPanel(SetupWindow window) {
+	public SetupPanel(SetupWindow setupWindow, MainWindow mainWindow) {
 		this.setPreferredSize(new Dimension(400, 250));
 		
 		JLabel usernameInstructions = new JLabel("Please input your GitHub username.");
@@ -31,7 +31,8 @@ public class SetupPanel extends JPanel {
 				catch (FileNotFoundException ex) {
 					System.out.println("An error occurred, exiting program. Please manually add your token to a file named \"token.txt\" in the correct folder.");
 				}
-				window.setVisibility(false);
+				setupWindow.setVisibility(false);
+				mainWindow.setVisibility(true);
 			}
 		});
 		

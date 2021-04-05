@@ -8,8 +8,8 @@ public class Driver {
 
 	public static void main(String[] args) {
 		MainWindow mainWindow = new MainWindow();
-		SetupWindow setupWindow = new SetupWindow();
-		GitHubApiClient gitHubApiClient = connectUser(setupWindow);
+		SetupWindow setupWindow = new SetupWindow(mainWindow);
+		GitHubApiClient gitHubApiClient = connectUser(mainWindow, setupWindow);
 	}
 	
 	// used to locate the credential file in the project
@@ -25,7 +25,7 @@ public class Driver {
 		return credentialFile;
 	}
 
-	private static GitHubApiClient connectUser(SetupWindow setupWindow) {
+	private static GitHubApiClient connectUser(MainWindow mainWindow, SetupWindow setupWindow) {
 		GitHubApiClient gitHubApiClient = null;
 		try {
 			File credentialFile = findCredentialFile();
@@ -33,6 +33,7 @@ public class Driver {
 			String user = fileScan.nextLine();
 			String token = fileScan.nextLine();
 			gitHubApiClient = new GitHubApiClient(user, token);
+			mainWindow.setVisibility(true);
 			fileScan.close();
 		}
 		catch (FileNotFoundException e) {

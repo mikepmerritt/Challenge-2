@@ -2,10 +2,10 @@ import javax.swing.JFrame;
 
 public class SetupWindow extends JFrame {
 	
-	public SetupWindow() {
+	public SetupWindow(MainWindow mainWindow) {
 		super("First Time Setup");
 		this.setSize(400, 250);
-		this.add(new SetupPanel(this));
+		this.add(new SetupPanel(this, mainWindow));
 		this.setVisible(false);
 	}
 	
