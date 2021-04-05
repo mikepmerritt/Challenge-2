@@ -11,6 +11,7 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 
 public class SetupPanel extends JPanel {
+	
 	public SetupPanel(SetupWindow setupWindow, MainWindow mainWindow) {
 		this.setPreferredSize(new Dimension(400, 250));
 		
@@ -32,7 +33,7 @@ public class SetupPanel extends JPanel {
 					System.out.println("An error occurred, exiting program. Please manually add your token to a file named \"token.txt\" in the correct folder.");
 				}
 				setupWindow.setVisibility(false);
-				mainWindow.setVisibility(true);
+				Driver.connectUser(mainWindow, setupWindow);
 			}
 		});
 		

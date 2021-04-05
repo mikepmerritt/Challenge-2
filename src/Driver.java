@@ -6,6 +6,9 @@ import github.tools.responseObjects.*;
 
 public class Driver {
 
+	private static String user;
+	private static String token;
+	
 	public static void main(String[] args) {
 		MainWindow mainWindow = new MainWindow();
 		SetupWindow setupWindow = new SetupWindow(mainWindow);
@@ -25,14 +28,15 @@ public class Driver {
 		return credentialFile;
 	}
 
-	private static GitHubApiClient connectUser(MainWindow mainWindow, SetupWindow setupWindow) {
+	public static GitHubApiClient connectUser(MainWindow mainWindow, SetupWindow setupWindow) {
 		GitHubApiClient gitHubApiClient = null;
 		try {
 			File credentialFile = findCredentialFile();
 			Scanner fileScan = new Scanner(credentialFile);
-			String user = fileScan.nextLine();
-			String token = fileScan.nextLine();
+			user = fileScan.nextLine();
+			token = fileScan.nextLine();
 			gitHubApiClient = new GitHubApiClient(user, token);
+			mainWindow.setGitHubApiClient(gitHubApiClient);
 			mainWindow.setVisibility(true);
 			fileScan.close();
 		}
@@ -40,5 +44,9 @@ public class Driver {
 			setupWindow.setVisibility(true);
 		}
 		return gitHubApiClient;
+	}
+	
+	public static String getUsername() {
+		return user;
 	}
 }
