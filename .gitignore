@@ -10,3 +10,4 @@ out/
 .env
 Test.java
 target/
+token.txt
