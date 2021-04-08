@@ -10,10 +10,12 @@ public class Driver {
 	private static String user;
 	private static String token;
 	
+	private static LinkRepoWindow linkRepoWindow;
 	// main method, loads all windows (although they aren't all visible by default)
 	public static void main(String[] args) {
 		MainWindow mainWindow = new MainWindow();
 		SetupWindow setupWindow = new SetupWindow(mainWindow);
+		linkRepoWindow = new LinkRepoWindow(mainWindow);
 		GitHubApiClient gitHubApiClient = connectUser(mainWindow, setupWindow);
 	}
 	
@@ -55,4 +57,10 @@ public class Driver {
 	public static String getUsername() {
 		return user;
 	}
+	
+	// sets the linkRepo Window to visible when the button is pressed in the main panel 
+	public static void updateLinkRepoVisibility() {
+		linkRepoWindow.setVisibility(true);
+	}
 }
+
