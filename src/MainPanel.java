@@ -12,6 +12,8 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
+import git.tools.client.GitSubprocessClient;
+
 public class MainPanel extends JPanel {
 	
 	// these components can change during runtime, so they can't be declared in the constructor like the others
@@ -44,12 +46,22 @@ public class MainPanel extends JPanel {
 		JButton repoButton = new JButton("Link a repo");
 		repoButtonListener(repoButton);
 		this.add(repoButton);
-
+		
 	}
 	
 	// this updates all of the components that can be updated (the ones not declared in the constructor)
 	public void updateWindow() {
 		selectedUser.setText("Logged in as " + Driver.getUsername());
+	}
+	
+	// given a local repository, find the name of the remote one
+	// this name, along with the username (Driver.getUsername()), are necessary for GitHub commands
+	public String getRepoName(String filepath) {
+		GitSubprocessClient finder = new GitSubprocessClient(filepath);
+		String commandResult = finder.runGitCommand("remote get-url origin");
+		commandResult = commandResult.replace("https://github.com/" + Driver.getUsername() + "/", "");
+		commandResult = commandResult.replace(".git", "");
+		return commandResult;
 	}
 	
 	//action listener for the linking repo button
