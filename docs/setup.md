@@ -9,7 +9,7 @@
 [GitSubprocessClient](https://github.com/CSC109/GitSubprocessClient) (v0.0.9)
 [GitHubApiClient](https://github.com/CSC109/GitHubApiClient) (v0.0.5)
 - Simply download the .jar files from the repos under the releases section and add them as extra Java packages to the project.
-- When being made, the most recent versions of the GitSubprocessClient and GitHubApiClient were used along with either an openjdk-12.0.2 or version of Java.
+- When being made, the most recent versions of the GitSubprocessClient and GitHubApiClient were used along with either an openjdk-12.0.2 or Java 1.8.0.
 
 #### Okay... that's all set up, what now?
 - Once the app launches, it'll ask you to enter your username and token. Don't worry, the information is safe with us. We only need it so we can access your repositories to help you best utilize our application
