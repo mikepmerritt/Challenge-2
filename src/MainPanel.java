@@ -47,6 +47,8 @@ public class MainPanel extends JPanel {
 		repoButtonListener(repoButton);
 		this.add(repoButton);
 		
+		System.out.println(getRepoOwner("E:\\GameDevelopment\\Sitting-Ducks"));
+		System.out.println(getRepoName("E:\\GameDevelopment\\Sitting-Ducks"));
 	}
 	
 	// this updates all of the components that can be updated (the ones not declared in the constructor)
@@ -54,13 +56,27 @@ public class MainPanel extends JPanel {
 		selectedUser.setText("Logged in as " + Driver.getUsername());
 	}
 	
+	// given a local repository, find the username of the owner
+	// this name, along with the name of the repo (see getRepoName(String filepath)), are necessary for GitHub commands
+	public String getRepoOwner(String filepath) {
+		GitSubprocessClient finder = new GitSubprocessClient(filepath);
+		String commandResult = finder.runGitCommand("remote get-url origin");
+		commandResult += "\n";
+		commandResult = commandResult.replace("https://github.com/", "");
+		commandResult = commandResult.replace(".git\n", "");
+		commandResult = commandResult.substring(0, commandResult.indexOf("/"));
+		return commandResult;
+	}
+	
 	// given a local repository, find the name of the remote one
-	// this name, along with the username (Driver.getUsername()), are necessary for GitHub commands
+	// this name, along with the username of the repo owner (see getRepoOwner(String filepath)), are necessary for GitHub commands
 	public String getRepoName(String filepath) {
 		GitSubprocessClient finder = new GitSubprocessClient(filepath);
 		String commandResult = finder.runGitCommand("remote get-url origin");
-		commandResult = commandResult.replace("https://github.com/" + Driver.getUsername() + "/", "");
-		commandResult = commandResult.replace(".git", "");
+		commandResult += "\n";
+		commandResult = commandResult.replace("https://github.com/", "");
+		commandResult = commandResult.replace(".git\n", "");
+		commandResult = commandResult.substring(commandResult.indexOf("/") + 1);
 		return commandResult;
 	}
 	
