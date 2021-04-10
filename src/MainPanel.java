@@ -46,9 +46,6 @@ public class MainPanel extends JPanel {
 		JButton repoButton = new JButton("Link a repo");
 		repoButtonListener(repoButton);
 		this.add(repoButton);
-		
-		System.out.println(getRepoOwner("E:\\GameDevelopment\\Sitting-Ducks"));
-		System.out.println(getRepoName("E:\\GameDevelopment\\Sitting-Ducks"));
 	}
 	
 	// this updates all of the components that can be updated (the ones not declared in the constructor)
