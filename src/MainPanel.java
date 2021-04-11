@@ -15,6 +15,7 @@ import javax.swing.JPanel;
 import github.tools.client.GitHubApiClient;
 import github.tools.client.QueryParams;
 import github.tools.responseObjects.ListPullRequestsResponse;
+import git.tools.client.GitSubprocessClient;
 
 public class MainPanel extends JPanel {
 	
@@ -48,9 +49,8 @@ public class MainPanel extends JPanel {
 		JButton repoButton = new JButton("Link a repo");
 		repoButtonListener(repoButton);
 		
-		JLabel pullRequestLabel = new JLabel(pullRequest);
+		//JLabel pullRequestLabel = new JLabel(pullRequest);
 		this.add(repoButton);
-
 	}
 	
 	// this updates all of the components that can be updated (the ones not declared in the constructor)
@@ -67,6 +67,30 @@ public class MainPanel extends JPanel {
 		return "" + listPullRequestsResponse;
 	}
 	*/
+	
+	// given a local repository, find the username of the owner
+	// this name, along with the name of the repo (see getRepoName(String filepath)), are necessary for GitHub commands
+	public String getRepoOwner(String filepath) {
+		GitSubprocessClient finder = new GitSubprocessClient(filepath);
+		String commandResult = finder.runGitCommand("remote get-url origin");
+		commandResult += "\n";
+		commandResult = commandResult.replace("https://github.com/", "");
+		commandResult = commandResult.replace(".git\n", "");
+		commandResult = commandResult.substring(0, commandResult.indexOf("/"));
+		return commandResult;
+	}
+	
+	// given a local repository, find the name of the remote one
+	// this name, along with the username of the repo owner (see getRepoOwner(String filepath)), are necessary for GitHub commands
+	public String getRepoName(String filepath) {
+		GitSubprocessClient finder = new GitSubprocessClient(filepath);
+		String commandResult = finder.runGitCommand("remote get-url origin");
+		commandResult += "\n";
+		commandResult = commandResult.replace("https://github.com/", "");
+		commandResult = commandResult.replace(".git\n", "");
+		commandResult = commandResult.substring(commandResult.indexOf("/") + 1);
+		return commandResult;
+	}
 	
 	//action listener for the linking repo button
 	public void repoButtonListener(JButton repoButton) {
