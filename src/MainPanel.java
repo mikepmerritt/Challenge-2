@@ -12,6 +12,10 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
+import github.tools.client.GitHubApiClient;
+import github.tools.client.QueryParams;
+import github.tools.responseObjects.ListPullRequestsResponse;
+
 public class MainPanel extends JPanel {
 	
 	// these components can change during runtime, so they can't be declared in the constructor like the others
@@ -43,6 +47,8 @@ public class MainPanel extends JPanel {
 		// other buttons
 		JButton repoButton = new JButton("Link a repo");
 		repoButtonListener(repoButton);
+		
+		JLabel pullRequestLabel = new JLabel(pullRequest);
 		this.add(repoButton);
 
 	}
@@ -51,6 +57,16 @@ public class MainPanel extends JPanel {
 	public void updateWindow() {
 		selectedUser.setText("Logged in as " + Driver.getUsername());
 	}
+	// this would set the label of the text to show any open pull requests
+	/*
+	public String pullRequest() {
+		GitHubApiClient gitHubApiClient = Driver.getApiClient();
+		QueryParams queryParams = new QueryParams();
+		queryParams.addParam("state", "open");
+		ListPullRequestsResponse listPullRequestsResponse = gitHubApiClient.listPullRequests(Driver.getUsername(), Driver.getRepoName(), queryParams);
+		return "" + listPullRequestsResponse;
+	}
+	*/
 	
 	//action listener for the linking repo button
 	public void repoButtonListener(JButton repoButton) {
