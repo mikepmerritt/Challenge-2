@@ -10,7 +10,7 @@ public class MainWindow extends JFrame {
 	// make the window
 	public MainWindow() {
 		super("GitHub Helper");
-		this.setSize(400, 600);
+		this.setSize(800, 600);
 		this.setDefaultCloseOperation(javax.swing.JFrame.EXIT_ON_CLOSE);
 		mainPanel = new MainPanel(this);
 		this.add(mainPanel);
