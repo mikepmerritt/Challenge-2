@@ -15,6 +15,7 @@ import java.awt.Color;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.SwingConstants;
 
 import github.tools.client.GitHubApiClient;
 import github.tools.client.QueryParams;
@@ -54,7 +55,7 @@ public class MainPanel extends JPanel {
 
 		// pull alert
 		JPanel pullPanel = new JPanel(new GridLayout(2, 1));
-		pullLabel = new JLabel("Check to see if your added repos are up to date.");
+		pullLabel = new JLabel("Check to see if your added repos are up to date.", SwingConstants.CENTER);
 		pullLabel.setHorizontalAlignment(JLabel.CENTER);
 		pullLabel.setForeground(Color.black);
 		// checkLocalRepositoriesForPulls();
@@ -64,15 +65,16 @@ public class MainPanel extends JPanel {
 			// on click, check the repositories again
 			@Override
 			public void actionPerformed(ActionEvent e) {
+				pullLabel.setText("Checking all added repos...");
 				checkLocalRepositoriesForPulls();
 			}
 		});
 		JButton resolveButton = new JButton("Pull down changes");
-		refreshButton.addActionListener(new ActionListener() {
+		resolveButton.addActionListener(new ActionListener() {
 			// on click, open the pull window and hide this one
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				// TODO: implement
+				pullAllRepositories();
 			}
 		});
 
@@ -86,7 +88,6 @@ public class MainPanel extends JPanel {
 		// pull request alert
 		JPanel pullRequestPanel = new JPanel(new GridLayout(1, 2));
 		pullRequestLabel = new JLabel();
-		pullRequest();
 		pullRequestLabel.setHorizontalAlignment(JLabel.CENTER);
 		JButton pullRequestRefreshButton = new JButton("Refresh");
 		pullRequestRefreshButton.addActionListener(new ActionListener() {
@@ -125,8 +126,11 @@ public class MainPanel extends JPanel {
 			while (fileScan.hasNext()) {
 				// get latest local commit
 				String filepath = fileScan.nextLine();
-				ListPullRequestsResponse listPullRequestsResponse = gitHubApiClient.listPullRequests(getRepoOwner(filepath), getRepoName(filepath), null);
-				//ArrayList<PullRequest> openPullRequests = listPullRequestsResponse.getPullRequests();
+				ListPullRequestsResponse listPullRequestsResponse = gitHubApiClient.listPullRequests(getRepoOwner(filepath), getRepoName(filepath).trim(), queryParams);
+				ArrayList<PullRequest> openPullRequests = listPullRequestsResponse.getPullRequests();
+				if(openPullRequests.size() > 0) {
+					pullRequestLabel.setText("There is an open pull request");
+				}
 				pullRequestLabel.setText("no open pull requests");
 		}
 			fileScan.close();
@@ -180,32 +184,100 @@ public class MainPanel extends JPanel {
 	}
 
 	public void checkLocalRepositoriesForPulls() {
+		pullLabel.setForeground(Color.black);
+		pullLabel.setText("Checking all added repos...");
+		pullLabel.paintImmediately(pullLabel.getVisibleRect());
 		boolean pullNeeded = false;
 		GitSubprocessClient repoSearcher;
 		try {
 			File repoFile = findRepoFile();
 			Scanner fileScan = new Scanner(repoFile);
-			while (fileScan.hasNext()) {
-				// get latest local commit
+			while(fileScan.hasNext()) {
+				// get local commits
 				String filepath = fileScan.nextLine();
 				repoSearcher = new GitSubprocessClient(filepath);
-				// same as "git log --oneline -n 1"
-				String latestLocalCommit = repoSearcher.gitLogOneLine(1);
-				// System.out.println(latestLocalCommit);
-				// get latest remote commit
-				ListCommitsInRepoResponse remoteCommits = gitHubApiClient.listCommitsInRepo(getRepoOwner(filepath),
-						getRepoName(filepath), null);
-				// System.out.println(remoteCommits.getCommits().toString());
+				// run "git log --oneline"
+				String localCommits = repoSearcher.gitLogAllOneLine();
+				// get remote commits
+				// run "git branch --show-current"
+				String currentBranch = repoSearcher.runGitCommand("branch --show-current");
+				QueryParams queryParams = new QueryParams();
+				queryParams.addParam("sha", currentBranch);
+				ListCommitsInRepoResponse remoteCommits = gitHubApiClient.listCommitsInRepo(getRepoOwner(filepath), getRepoName(filepath).trim(), queryParams);
+				// make sure every remote commit is in local commits (meaning you are up-to-date or ahead)
+				for(Commit commit : remoteCommits.getCommits()) {
+					String remoteCommitHash = commit.getCommitHash().substring(0, 7);
+					if(!localCommits.contains(remoteCommitHash)) {
+						pullNeeded = true;
+					}
+				}
 			}
 			fileScan.close();
-		} catch (FileNotFoundException e) {
-			// TODO: what goes here
+		}
+		catch (FileNotFoundException e) {
+			pullLabel.setForeground(Color.red);
+			pullLabel.setText("You don't have any repos added yet!");
 		}
 
 		if (pullNeeded) {
 			pullLabel.setForeground(Color.red);
 			pullLabel.setText("One of your local repositories is out of date!");
 		}
+		else {
+			pullLabel.setForeground(Color.black);
+			pullLabel.setText("Your local repositories appear to be up to date.");
+		}
+	}
+	
+	public void pullAllRepositories() {
+		pullLabel.setForeground(Color.black);
+		pullLabel.setText("Pulling all added repos...");
+		pullLabel.paintImmediately(pullLabel.getVisibleRect());
+		boolean mergeConflictExists = false; // flag for the first merge conflict
+		String mergeConflictList = "<br>";
+		try {
+			File repoFile = findRepoFile();
+			Scanner fileScan = new Scanner(repoFile);
+			while(fileScan.hasNext()) {
+				// get local repo
+				String filepath = fileScan.nextLine();
+				GitSubprocessClient repoPuller = new GitSubprocessClient(filepath);
+				// if there hasn't been a conflict, pull and keep waiting for the first one
+				if(!mergeConflictExists) {
+					mergeConflictExists = pullDownChanges(repoPuller);
+					if(mergeConflictExists) {
+						mergeConflictList += getRepoOwner(filepath) + "/" + getRepoName(filepath);
+					}
+				}
+				// else, pull and check to see if we need to add to the list of conflicts
+				else {
+					boolean currentMergeResult = pullDownChanges(repoPuller);
+					if(currentMergeResult) {
+						mergeConflictList += "<br>" + getRepoOwner(filepath) + "/" + getRepoName(filepath);
+					}
+				}	
+			}
+			fileScan.close();
+			
+			if(mergeConflictExists) {
+				pullLabel.setForeground(Color.red);
+				String mergeFailedMessage = "<html><div style='text-align: center;'><body>The following repositories ran into merge conflicts that you need to resolve and commit: " + mergeConflictList + "</body></html>";
+				pullLabel.setText(mergeFailedMessage);
+			}
+			else {
+				pullLabel.setForeground(Color.black);
+				pullLabel.setText("Your local repositories are now up to date.");
+			}
+		}
+		catch (FileNotFoundException e) {
+			pullLabel.setForeground(Color.red);
+			pullLabel.setText("You don't have any repos added yet!");
+		}
+	}
+	
+	public boolean pullDownChanges(GitSubprocessClient localRepo) {
+		String pull = localRepo.gitPull(localRepo.runGitCommand("branch --show-current"));
+		return pull.contains("Automatic merge failed; fix conflicts") || pull.contains("fatal: Exiting because of an unresolved conflict.");
 	}
 
 	// used to locate the credential file (token.txt) in the project
