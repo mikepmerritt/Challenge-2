@@ -135,7 +135,7 @@ public class MainPanel extends JPanel {
 				if (openPullRequests.size() > 0) {
 					pulls = "There are open pull requests on the repo " + getRepoName(filepath) + ": ";
 					for (int i = 0; i < openPullRequests.size(); i++) {
-						pulls = pulls + openPullRequests.get(i) + " ";
+						pulls = pulls + openPullRequests.get(i).getTitle() + " ";
 					}
 				}
 			}
