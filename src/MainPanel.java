@@ -131,7 +131,9 @@ public class MainPanel extends JPanel {
 				if(openPullRequests.size() > 0) {
 					pullRequestLabel.setText("There is an open pull request");
 				}
-				pullRequestLabel.setText("no open pull requests");
+				else {
+					pullRequestLabel.setText("no open pull requests");
+				}
 		}
 			fileScan.close();
 			
