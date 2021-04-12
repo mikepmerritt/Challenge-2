@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.Scanner;
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -17,7 +18,6 @@ import javax.swing.JPanel;
 
 import github.tools.client.GitHubApiClient;
 import github.tools.client.QueryParams;
-import github.tools.responseObjects.ListPullRequestsResponse;
 import git.tools.client.GitSubprocessClient;
 import github.tools.client.GitHubApiClient;
 import github.tools.client.QueryParams;
@@ -84,39 +84,57 @@ public class MainPanel extends JPanel {
 		this.add(pullPanel);
 
 		// pull request alert
-
+		JPanel pullRequestPanel = new JPanel(new GridLayout(1, 2));
+		pullRequestLabel = new JLabel();
+		pullRequest();
+		pullRequestLabel.setHorizontalAlignment(JLabel.CENTER);
+		JButton pullRequestRefreshButton = new JButton("Refresh");
+		pullRequestRefreshButton.addActionListener(new ActionListener() {
+			// on click, check the repositories again
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				pullRequest();
+			}
+		});
+		
 		// other buttons
 		JButton repoButton = new JButton("Link a repo");
 		repoButtonListener(repoButton);
 
-		// pullRequestLabel = new JLabel(pullRequest());
+		pullRequestPanel.add(pullRequestRefreshButton);
+		pullRequestPanel.add(pullRequestLabel);
 		this.add(repoButton);
-		this.add(pullRequestLabel);
+		
+		this.add(pullRequestPanel);
 	}
 
 	// this updates all of the components that can be updated (the ones not declared
 	// in the constructor)
 	public void updateWindow() {
 		selectedUser.setText("Logged in as " + Driver.getUsername());
-		// pullRequestLabel.setText(pullRequest());
 	}
 
 	// this would set the label of the text to show any open pull requests
-	/*
-	 * public String pullRequest() { GitHubApiClient gitHubApiClient =
-	 * Driver.getApiClient(); QueryParams queryParams = new QueryParams();
-	 * queryParams.addParam("state", "open"); String returnString = " "; try { File
-	 * repoFile = new File("repo.txt"); Scanner fileScan = new Scanner(repoFile);
-	 * String filepath = fileScan.nextLine(); fileScan.close(); returnString =
-	 * getRepoName(filepath);
-	 * 
-	 * //ListPullRequestsResponse listPullRequestsResponse =
-	 * gitHubApiClient.listPullRequests(getRepoOwner(filepath),
-	 * getRepoName(filepath), null);
-	 * 
-	 * } catch (FileNotFoundException e) { returnString = " "; } return
-	 * returnString; }
-	 */
+
+	public void pullRequest() {
+		QueryParams queryParams = new QueryParams();
+		queryParams.addParam("state", "open");
+		try {
+			File repoFile = findRepoFile();
+			Scanner fileScan = new Scanner(repoFile);
+			while (fileScan.hasNext()) {
+				// get latest local commit
+				String filepath = fileScan.nextLine();
+				ListPullRequestsResponse listPullRequestsResponse = gitHubApiClient.listPullRequests(getRepoOwner(filepath), getRepoName(filepath), null);
+				//ArrayList<PullRequest> openPullRequests = listPullRequestsResponse.getPullRequests();
+				pullRequestLabel.setText("no open pull requests");
+		}
+			fileScan.close();
+			
+		} catch (FileNotFoundException e) {
+			pullRequestLabel.setText("no repos to search");
+		}
+	}
 
 	// get an instance of the GitHubApiClient we made earlier so we can use it later
 	public void setGitHubApiClient(GitHubApiClient gitHubApiClient) {
