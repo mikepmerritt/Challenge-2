@@ -3,9 +3,11 @@ import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.PrintWriter;
+import java.util.Scanner;
 import java.awt.BorderLayout;
 
 import javax.swing.JButton;
@@ -20,7 +22,7 @@ import git.tools.client.GitSubprocessClient;
 public class MainPanel extends JPanel {
 	
 	// these components can change during runtime, so they can't be declared in the constructor like the others
-	private JLabel selectedUser;
+	private JLabel selectedUser, pullRequestLabel;
 	
 	// set up the panel and its components
 	public MainPanel() {
@@ -49,22 +51,38 @@ public class MainPanel extends JPanel {
 		JButton repoButton = new JButton("Link a repo");
 		repoButtonListener(repoButton);
 		
-		//JLabel pullRequestLabel = new JLabel(pullRequest);
+		//pullRequestLabel = new JLabel(pullRequest());
 		this.add(repoButton);
+		this.add(pullRequestLabel);
 	}
 	
 	// this updates all of the components that can be updated (the ones not declared in the constructor)
 	public void updateWindow() {
 		selectedUser.setText("Logged in as " + Driver.getUsername());
+		//pullRequestLabel.setText(pullRequest());
 	}
+	
 	// this would set the label of the text to show any open pull requests
 	/*
 	public String pullRequest() {
 		GitHubApiClient gitHubApiClient = Driver.getApiClient();
 		QueryParams queryParams = new QueryParams();
 		queryParams.addParam("state", "open");
-		ListPullRequestsResponse listPullRequestsResponse = gitHubApiClient.listPullRequests(Driver.getUsername(), Driver.getRepoName(), queryParams);
-		return "" + listPullRequestsResponse;
+		String returnString = " ";
+		try {
+			File repoFile = new File("repo.txt");
+			Scanner fileScan = new Scanner(repoFile);
+			String filepath = fileScan.nextLine();
+			fileScan.close();			
+			returnString = getRepoName(filepath);
+
+			//ListPullRequestsResponse listPullRequestsResponse = gitHubApiClient.listPullRequests(getRepoOwner(filepath), getRepoName(filepath), null);
+			
+		}
+		catch (FileNotFoundException e) {
+			returnString = " ";
+		}
+		return returnString;
 	}
 	*/
 	
