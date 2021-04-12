@@ -59,9 +59,10 @@ public class Driver {
 		return user;
 	}
 	
-	// sets the linkRepo Window to visible when the button is pressed in the main panel 
-	public static void updateLinkRepoVisibility() {
+	// sets the linkRepo Window to visible when the button is pressed in the main panel and passes through the theme
+	public static void updateLinkRepoVisibility(boolean theme) {
 		linkRepoWindow.setVisibility(true);
+		linkRepoWindow.updateTheme(theme);
 	}
 }
 

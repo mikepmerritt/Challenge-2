@@ -6,7 +6,8 @@ public class MainWindow extends JFrame {
 	
 	private MainPanel mainPanel;
 	private GitHubApiClient gitHubApiClient;
-	
+	public boolean theme;
+
 	// make the window
 	public MainWindow() {
 		super("GitHub Helper");
@@ -22,6 +23,7 @@ public class MainWindow extends JFrame {
 		this.gitHubApiClient = gitHubApiClient;
 		mainPanel.setGitHubApiClient(gitHubApiClient);
 	}
+	
 	
 	public GitHubApiClient getGitHubApiClient() {
 		return gitHubApiClient;
