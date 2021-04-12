@@ -137,9 +137,9 @@ public class MainPanel extends JPanel {
 					for (int i = 0; i < openPullRequests.size(); i++) {
 						pulls = pulls + openPullRequests.get(i) + " ";
 					}
-					pullRequestLabel.setText(pulls);
 				}
 			}
+			pullRequestLabel.setText(pulls);
 			fileScan.close();
 
 		} catch (FileNotFoundException e) {
