@@ -141,22 +141,36 @@ public class MainPanel extends JPanel {
 				// get latest local commit
 				String filepath = fileScan.nextLine();
 				repoSearcher = new GitSubprocessClient(filepath);
-				// same as "git log --oneline -n 1"
-				String latestLocalCommit = repoSearcher.gitLogOneLine(1);
-				//System.out.println(latestLocalCommit);
+				// run "git log --oneline"
+				String localCommits = repoSearcher.gitLogAllOneLine();
 				// get latest remote commit
-				ListCommitsInRepoResponse remoteCommits = gitHubApiClient.listCommitsInRepo(getRepoOwner(filepath), getRepoName(filepath), null);
-				//System.out.println(remoteCommits.getCommits().toString());
+				// run "git branch --show-current"
+				String currentBranch = repoSearcher.runGitCommand("branch --show-current");
+				System.out.println(currentBranch);
+				QueryParams queryParams = new QueryParams();
+				queryParams.addParam("sha", currentBranch);
+				ListCommitsInRepoResponse remoteCommits = gitHubApiClient.listCommitsInRepo(getRepoOwner(filepath), getRepoName(filepath).trim(), queryParams);
+				for(Commit commit : remoteCommits.getCommits()) {
+					String remoteCommitHash = commit.getCommitHash().substring(0, 7);
+					if(!localCommits.contains(remoteCommitHash)) {
+						pullNeeded = true;
+					}
+				}
 			}
 			fileScan.close();
 		}
 		catch (FileNotFoundException e) {
-			// TODO: what goes here
+			pullLabel.setForeground(Color.red);
+			pullLabel.setText("You don't have any repos added yet!");
 		}
 		
 		if(pullNeeded) {
 			pullLabel.setForeground(Color.red);
 			pullLabel.setText("One of your local repositories is out of date!");
+		}
+		else {
+			pullLabel.setForeground(Color.black);
+			pullLabel.setText("Your local repositories appear to be up to date.");
 		}
 	}
 	
