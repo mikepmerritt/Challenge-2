@@ -12,10 +12,7 @@ import java.util.Scanner;
 import java.awt.BorderLayout;
 import java.awt.Color;
 
-import javax.swing.JButton;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.SwingConstants;
+import javax.swing.*;
 
 import github.tools.client.GitHubApiClient;
 import github.tools.client.QueryParams;
@@ -28,16 +25,17 @@ public class MainPanel extends JPanel {
 
 	// these components can change during runtime, so they can't be declared in the
 	// constructor like the others
-	private JLabel selectedUser, pullLabel, titleLabel, pullRequestLabel;
-	private JPanel titlePanel, pullPanel, pullButtons, otherButtonsJPanel, pullRequestPanel;
-	public JButton refreshButton, resolveButton, repoButton, themeButton, pullRequestRefreshButton, addButton;
+	private JLabel selectedUser, pullLabel, titleLabel, pullRequestLabel, addCommitLabel;
+	private JPanel titlePanel, pullPanel, pullButtons, otherButtonsJPanel, pullRequestPanel, commitPanel;
+	public JButton refreshButton, resolveButton, repoButton, themeButton, pullRequestRefreshButton, addButton, commitButton;
+	public JTextField commitLink, commitMessage;
 	private GitHubApiClient gitHubApiClient;
 	private MainWindow mainWindow;
 	public boolean theme;
 
 	// set up the panel and its components
 	public MainPanel(MainWindow mainWindow) {
-		super(new GridLayout(5, 1));
+		super(new GridLayout(6, 1));
 		this.setPreferredSize(new Dimension(400, 600));
 		this.mainWindow = mainWindow;
 		theme = false; // dark mode is off by default
@@ -53,7 +51,22 @@ public class MainPanel extends JPanel {
 		titlePanel.add(selectedUser, BorderLayout.SOUTH);
 
 		this.add(titlePanel);
+
 		// commit alert
+		commitPanel = new JPanel(new GridLayout(4,1));
+		commitButton = new JButton("Commit changes");
+		commitLink = new JTextField("Put repo link here",25);
+		commitMessage = new JTextField("Put commit message here", 25);
+		addCommitLabel = new JLabel("");
+		commitButton.addActionListener(new ActionListener() {
+			// on click, check the repositories again
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				addCommitLabel.setText("Checking all added repos...");
+				commitChanges(commitLink.getText(), commitMessage.getText());
+			}
+		});
+
 
 		// pull alert
 		pullPanel = new JPanel(new GridLayout(2, 1));
@@ -142,6 +155,12 @@ public class MainPanel extends JPanel {
 		otherButtonsJPanel.add(themeButton);
 		otherButtonsJPanel.add(addButton);
 		this.add(otherButtonsJPanel);
+
+		commitPanel.add(addCommitLabel);
+		commitPanel.add(commitLink);
+		commitPanel.add(commitMessage);
+		commitPanel.add(commitButton);
+		this.add(commitPanel);
 	}
 
 	// this updates all of the components that can be updated (the ones not declared
@@ -154,15 +173,25 @@ public class MainPanel extends JPanel {
 		try {
 			File repoFile = findRepoFile();
 			Scanner fileScan = new Scanner(repoFile);
-			String adds = "There are no changes to add to the commit";
 			// loop through any repos in the file and check for open pulls
 			while (fileScan.hasNext()) {
 				String filepath = fileScan.nextLine();
 				GitSubprocessClient finder = new GitSubprocessClient(filepath);
-				adds = finder.runGitCommand("add .");
+				finder.runGitCommand("add .");
 			}
+			addCommitLabel.setText("All changes have been added.");
 		} catch (FileNotFoundException e) {
-			pullRequestLabel.setText("There are no linked repos to search");
+			addCommitLabel.setText("Cannot add: there are no linked repos to search.");
+		}
+	}
+
+	public void commitChanges(String repoLink, String commitMessage) {
+		try {
+			GitSubprocessClient finder = new GitSubprocessClient(repoLink);
+			finder.runGitCommand("commit -m \"" + commitMessage + "\"");
+			addCommitLabel.setText("All changes have been committed.");
+		} catch (Exception e) {
+			addCommitLabel.setText("Cannot commit: The repo link is not valid.");
 		}
 	}
 
