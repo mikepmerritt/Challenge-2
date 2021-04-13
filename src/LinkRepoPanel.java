@@ -61,7 +61,7 @@ public class LinkRepoPanel extends JPanel {
 			enterButton.setBackground(Color.gray);
 			enterButton.setForeground(Color.white);
 			fileField.setBackground(Color.lightGray);
-			fileField.setForeground(Color.white);
+			fileField.setForeground(Color.darkGray);
 		}
 	}
 

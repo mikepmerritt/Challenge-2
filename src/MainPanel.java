@@ -26,7 +26,7 @@ public class MainPanel extends JPanel {
 	// these components can change during runtime, so they can't be declared in the
 	// constructor like the others
 	private JLabel selectedUser, pullLabel, titleLabel, pullRequestLabel, addCommitLabel;
-	private JPanel titlePanel, pullPanel, pullButtons, otherButtonsJPanel, pullRequestPanel, commitPanel;
+	private JPanel titlePanel, pullPanel, pullButtons, otherButtonsJPanel, pullRequestPanel, commitPanel, commitFieldsPanel, commitButtonsPanel;
 	public JButton refreshButton, resolveButton, repoButton, themeButton, pullRequestRefreshButton, addButton, commitButton;
 	public JTextField commitPath, commitMessage;
 	private GitHubApiClient gitHubApiClient;
@@ -35,7 +35,7 @@ public class MainPanel extends JPanel {
 
 	// set up the panel and its components
 	public MainPanel(MainWindow mainWindow) {
-		super(new GridLayout(6, 1));
+		super(new GridLayout(5, 1));
 		this.setPreferredSize(new Dimension(400, 600));
 		this.mainWindow = mainWindow;
 		theme = false; // dark mode is off by default
@@ -53,7 +53,9 @@ public class MainPanel extends JPanel {
 		this.add(titlePanel);
 
 		// commit alert
-		commitPanel = new JPanel(new GridLayout(5,1));
+		commitPanel = new JPanel(new GridLayout(3,1));
+		commitFieldsPanel = new JPanel();
+		commitButtonsPanel = new JPanel();
 		commitButton = new JButton("Commit changes");
 		commitPath = new JTextField("Put repo filepath here",25);
 		commitMessage = new JTextField("Put commit message here", 25);
@@ -76,6 +78,15 @@ public class MainPanel extends JPanel {
 			}
 		});
 
+		commitPanel.add(addCommitLabel);
+		commitFieldsPanel.add(commitPath);
+		commitFieldsPanel.add(commitMessage);
+		commitPanel.add(commitFieldsPanel);
+		commitButtonsPanel.add(addButton);
+		commitButtonsPanel.add(commitButton);
+		commitPanel.add(commitButtonsPanel);
+		
+		this.add(commitPanel);
 
 		// pull alert
 		pullPanel = new JPanel(new GridLayout(2, 1));
@@ -155,13 +166,6 @@ public class MainPanel extends JPanel {
 		otherButtonsJPanel.add(repoButton);
 		otherButtonsJPanel.add(themeButton);
 		this.add(otherButtonsJPanel);
-
-		commitPanel.add(addCommitLabel);
-		commitPanel.add(addButton);
-		commitPanel.add(commitPath);
-		commitPanel.add(commitMessage);
-		commitPanel.add(commitButton);
-		this.add(commitPanel);
 	}
 
 	// this updates all of the components that can be updated (the ones not declared
@@ -216,6 +220,8 @@ public class MainPanel extends JPanel {
 			pullRequestLabel.setForeground(Color.darkGray);
 			addCommitLabel.setForeground(Color.darkGray);
 			commitPanel.setBackground(Color.white);
+			commitFieldsPanel.setBackground(Color.white);
+			commitButtonsPanel.setBackground(Color.white);
 			if(!pullLabel.getForeground().equals(Color.red)) {
 				pullLabel.setForeground(Color.darkGray);
 			}
@@ -253,6 +259,8 @@ public class MainPanel extends JPanel {
 			pullRequestLabel.setForeground(Color.white);
 			addCommitLabel.setForeground(Color.white);
 			commitPanel.setBackground(Color.darkGray);
+			commitFieldsPanel.setBackground(Color.darkGray);
+			commitButtonsPanel.setBackground(Color.darkGray);
 			if(!pullLabel.getForeground().equals(Color.red)) {
 				pullLabel.setForeground(Color.white);
 			}
@@ -273,9 +281,9 @@ public class MainPanel extends JPanel {
 			addButton.setBackground(Color.gray);
 			addButton.setForeground(Color.white);
 			commitPath.setBackground(Color.lightGray);
-			commitPath.setForeground(Color.white);
+			commitPath.setForeground(Color.darkGray);
 			commitMessage.setBackground(Color.lightGray);
-			commitMessage.setForeground(Color.white);
+			commitMessage.setForeground(Color.darkGray);
 		}
 		mainWindow.getLinkRepoWindow().updateTheme(theme);
 	}
