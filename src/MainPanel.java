@@ -27,6 +27,7 @@ public class MainPanel extends JPanel {
 	// constructor like the others
 	private JLabel selectedUser, pullLabel, titleLabel;
 	private JPanel titlePanel, pullPanel, pullButtons, otherButtonsJPanel;
+	public JButton refreshButton, resolveButton, repoButton, themeButton;
 	private GitHubApiClient gitHubApiClient;
 	private MainWindow mainWindow;
 	public boolean theme;
@@ -36,7 +37,7 @@ public class MainPanel extends JPanel {
 		super(new GridLayout(5, 1));
 		this.setPreferredSize(new Dimension(400, 600));
 		this.mainWindow = mainWindow;
-		theme = true;
+		theme = false; // dark mode is off by default
 
 		// title text
 		titlePanel = new JPanel(new BorderLayout());
@@ -59,7 +60,7 @@ public class MainPanel extends JPanel {
 		// checkLocalRepositoriesForPulls();
 		pullButtons = new JPanel();
 
-		JButton refreshButton = new JButton("Refresh");
+		refreshButton = new JButton("Refresh");
 		refreshButton.addActionListener(new ActionListener() {
 			// on click, check the repositories again
 			@Override
@@ -68,7 +69,7 @@ public class MainPanel extends JPanel {
 				checkLocalRepositoriesForPulls();
 			}
 		});
-		JButton resolveButton = new JButton("Pull down changes");
+		resolveButton = new JButton("Pull down changes");
 		resolveButton.addActionListener(new ActionListener() {
 			// on click, open the pull window and hide this one
 			@Override
@@ -88,7 +89,7 @@ public class MainPanel extends JPanel {
 
 		// other buttons
 		otherButtonsJPanel = new JPanel();
-		JButton repoButton = new JButton("Link a repo");
+		repoButton = new JButton("Link a repo");
 		repoButton.addActionListener(new ActionListener() {
 			// on click, the button should the setup window, and try connecting the user
 			// again
@@ -100,8 +101,7 @@ public class MainPanel extends JPanel {
 			}
 		});
 
-		JButton themeButton = new JButton("Theme");
-		updateTheme();
+		themeButton = new JButton("Theme");
 		themeButton.addActionListener(new ActionListener() {
 			// on click, open the pull window and hide this one
 			@Override
@@ -124,15 +124,30 @@ public class MainPanel extends JPanel {
 	// updates the theme from light to dark when the user clicks the button
 	public void updateTheme() {
 		if (theme) {
+			Color defaultButtonColor = new JButton().getBackground();
+			
 			this.setBackground(Color.white);
 			titlePanel.setBackground(Color.white);
 			pullPanel.setBackground(Color.white);
 			pullButtons.setBackground(Color.white);
 			otherButtonsJPanel.setBackground(Color.white);
 			selectedUser.setForeground(Color.darkGray);
-			pullLabel.setForeground(Color.darkGray);
 			titleLabel.setForeground(Color.darkGray);
+			if(!pullLabel.getForeground().equals(Color.red)) {
+				pullLabel.setForeground(Color.darkGray);
+			}
 			theme = false;
+			
+			refreshButton.setBackground(defaultButtonColor);
+			refreshButton.setForeground(Color.darkGray);
+			resolveButton.setBackground(defaultButtonColor);
+			resolveButton.setForeground(Color.darkGray);
+			repoButton.setBackground(defaultButtonColor);
+			repoButton.setForeground(Color.darkGray);
+			themeButton.setBackground(defaultButtonColor);
+			themeButton.setForeground(Color.darkGray);
+			
+			
 		} else {
 			this.setBackground(Color.darkGray);
 			titlePanel.setBackground(Color.darkGray);
@@ -140,10 +155,22 @@ public class MainPanel extends JPanel {
 			pullButtons.setBackground(Color.darkGray);
 			otherButtonsJPanel.setBackground(Color.darkGray);
 			selectedUser.setForeground(Color.white);
-			pullLabel.setForeground(Color.white);
 			titleLabel.setForeground(Color.white);
+			if(!pullLabel.getForeground().equals(Color.red)) {
+				pullLabel.setForeground(Color.white);
+			}
 			theme = true;
+			
+			refreshButton.setBackground(Color.gray);
+			refreshButton.setForeground(Color.white);
+			resolveButton.setBackground(Color.gray);
+			resolveButton.setForeground(Color.white);
+			repoButton.setBackground(Color.gray);
+			repoButton.setForeground(Color.white);
+			themeButton.setBackground(Color.gray);
+			themeButton.setForeground(Color.white);
 		}
+		mainWindow.getLinkRepoWindow().updateTheme(theme);
 	}
 	
 	// get an instance of the GitHubApiClient we made earlier so we can use it later
@@ -178,7 +205,12 @@ public class MainPanel extends JPanel {
 	}
 
 	public void checkLocalRepositoriesForPulls() {
-		pullLabel.setForeground(Color.black);
+		if(theme) {
+			pullLabel.setForeground(Color.white);
+		}
+		else {
+			pullLabel.setForeground(Color.black);
+		}
 		pullLabel.setText("Checking all added repos...");
 		pullLabel.paintImmediately(pullLabel.getVisibleRect());
 		boolean pullNeeded = false;
@@ -218,13 +250,23 @@ public class MainPanel extends JPanel {
 			pullLabel.setForeground(Color.red);
 			pullLabel.setText("One of your local repositories is out of date!");
 		} else {
-			pullLabel.setForeground(Color.black);
+			if(theme) {
+				pullLabel.setForeground(Color.white);
+			}
+			else {
+				pullLabel.setForeground(Color.black);
+			}
 			pullLabel.setText("Your local repositories appear to be up to date.");
 		}
 	}
 
 	public void pullAllRepositories() {
-		pullLabel.setForeground(Color.black);
+		if(theme) {
+			pullLabel.setForeground(Color.white);
+		}
+		else {
+			pullLabel.setForeground(Color.black);
+		}
 		pullLabel.setText("Pulling all added repos...");
 		pullLabel.paintImmediately(pullLabel.getVisibleRect());
 		boolean mergeConflictExists = false; // flag for the first merge conflict
@@ -259,7 +301,12 @@ public class MainPanel extends JPanel {
 						+ mergeConflictList + "</body></html>";
 				pullLabel.setText(mergeFailedMessage);
 			} else {
-				pullLabel.setForeground(Color.black);
+				if(theme) {
+					pullLabel.setForeground(Color.white);
+				}
+				else {
+					pullLabel.setForeground(Color.black);
+				}
 				pullLabel.setText("Your local repositories are now up to date.");
 			}
 		} catch (FileNotFoundException e) {

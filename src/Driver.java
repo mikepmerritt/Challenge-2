@@ -18,6 +18,7 @@ public class Driver {
 		linkRepoWindow = new LinkRepoWindow(mainWindow);
 		GitHubApiClient gitHubApiClient = connectUser(mainWindow, setupWindow);
 		mainWindow.setGitHubApiClient(gitHubApiClient);
+		mainWindow.setLinkRepoWindow(linkRepoWindow);
 	}
 	
 	// used to locate the credential file (token.txt) in the project
