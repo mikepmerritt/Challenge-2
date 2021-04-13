@@ -28,7 +28,7 @@ public class MainPanel extends JPanel {
 	private JLabel selectedUser, pullLabel, titleLabel, pullRequestLabel, addCommitLabel;
 	private JPanel titlePanel, pullPanel, pullButtons, otherButtonsJPanel, pullRequestPanel, commitPanel;
 	public JButton refreshButton, resolveButton, repoButton, themeButton, pullRequestRefreshButton, addButton, commitButton;
-	public JTextField commitLink, commitMessage;
+	public JTextField commitPath, commitMessage;
 	private GitHubApiClient gitHubApiClient;
 	private MainWindow mainWindow;
 	public boolean theme;
@@ -53,17 +53,26 @@ public class MainPanel extends JPanel {
 		this.add(titlePanel);
 
 		// commit alert
-		commitPanel = new JPanel(new GridLayout(4,1));
+		commitPanel = new JPanel(new GridLayout(5,1));
 		commitButton = new JButton("Commit changes");
-		commitLink = new JTextField("Put repo link here",25);
+		commitPath = new JTextField("Put repo link here",25);
 		commitMessage = new JTextField("Put commit message here", 25);
 		addCommitLabel = new JLabel("");
+		addCommitLabel.setHorizontalAlignment(JLabel.CENTER);
 		commitButton.addActionListener(new ActionListener() {
 			// on click, check the repositories again
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				addCommitLabel.setText("Checking all added repos...");
-				commitChanges(commitLink.getText(), commitMessage.getText());
+				commitChanges(commitPath.getText(), commitMessage.getText());
+			}
+		});
+		addButton = new JButton("Add Changes");
+		addButton.addActionListener(new ActionListener() {
+			// on click, open the pull window and hide this one
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				addChanges();
 			}
 		});
 
@@ -142,22 +151,14 @@ public class MainPanel extends JPanel {
 			}
 		});
 
-		addButton = new JButton("Add Changes");
-		addButton.addActionListener(new ActionListener() {
-			// on click, open the pull window and hide this one
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				addChanges();
-			}
-		});
 
 		otherButtonsJPanel.add(repoButton);
 		otherButtonsJPanel.add(themeButton);
-		otherButtonsJPanel.add(addButton);
 		this.add(otherButtonsJPanel);
 
 		commitPanel.add(addCommitLabel);
-		commitPanel.add(commitLink);
+		commitPanel.add(addButton);
+		commitPanel.add(commitPath);
 		commitPanel.add(commitMessage);
 		commitPanel.add(commitButton);
 		this.add(commitPanel);
@@ -191,7 +192,7 @@ public class MainPanel extends JPanel {
 			finder.runGitCommand("commit -m \"" + commitMessage + "\"");
 			addCommitLabel.setText("All changes have been committed.");
 		} catch (Exception e) {
-			addCommitLabel.setText("Cannot commit: The repo link is not valid.");
+			addCommitLabel.setText("Cannot commit: The repo filepath is not valid.");
 		}
 	}
 
@@ -230,8 +231,8 @@ public class MainPanel extends JPanel {
 			commitButton.setForeground(Color.darkGray);
 			addButton.setBackground(defaultButtonColor);
 			addButton.setForeground(Color.darkGray);
-			commitLink.setBackground(Color.white);
-			commitLink.setForeground(Color.black);
+			commitPath.setBackground(Color.white);
+			commitPath.setForeground(Color.black);
 			commitMessage.setBackground(Color.white);
 			commitMessage.setForeground(Color.black);
 			
@@ -267,8 +268,8 @@ public class MainPanel extends JPanel {
 			commitButton.setForeground(Color.white);
 			addButton.setBackground(Color.gray);
 			addButton.setForeground(Color.white);
-			commitLink.setBackground(Color.lightGray);
-			commitLink.setForeground(Color.white);
+			commitPath.setBackground(Color.lightGray);
+			commitPath.setForeground(Color.white);
 			commitMessage.setBackground(Color.lightGray);
 			commitMessage.setForeground(Color.white);
 		}
