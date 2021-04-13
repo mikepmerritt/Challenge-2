@@ -55,7 +55,7 @@ public class MainPanel extends JPanel {
 		// commit alert
 		commitPanel = new JPanel(new GridLayout(5,1));
 		commitButton = new JButton("Commit changes");
-		commitPath = new JTextField("Put repo link here",25);
+		commitPath = new JTextField("Put repo filepath here",25);
 		commitMessage = new JTextField("Put commit message here", 25);
 		addCommitLabel = new JLabel("");
 		addCommitLabel.setHorizontalAlignment(JLabel.CENTER);
@@ -189,8 +189,12 @@ public class MainPanel extends JPanel {
 	public void commitChanges(String repoLink, String commitMessage) {
 		try {
 			GitSubprocessClient finder = new GitSubprocessClient(repoLink);
-			finder.runGitCommand("commit -m \"" + commitMessage + "\"");
-			addCommitLabel.setText("All changes have been committed.");
+			String resultMessage = finder.runGitCommand("commit -m \"" + commitMessage + "\"");
+			if (resultMessage.contains("no changes added to commit")) {
+				addCommitLabel.setText("No changes have been added to the commit.");
+			} else if (resultMessage.contains("nothing to commit")) {
+				addCommitLabel.setText("There are no changes to commit.");
+			} else addCommitLabel.setText("All changes have been committed.");
 		} catch (Exception e) {
 			addCommitLabel.setText("Cannot commit: The repo filepath is not valid.");
 		}
