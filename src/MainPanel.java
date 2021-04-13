@@ -30,7 +30,7 @@ public class MainPanel extends JPanel {
 	// constructor like the others
 	private JLabel selectedUser, pullLabel, titleLabel, pullRequestLabel;
 	private JPanel titlePanel, pullPanel, pullButtons, otherButtonsJPanel, pullRequestPanel;
-	public JButton refreshButton, resolveButton, repoButton, themeButton, pullRequestRefreshButton;
+	public JButton refreshButton, resolveButton, repoButton, themeButton, pullRequestRefreshButton, addButton;
 	private GitHubApiClient gitHubApiClient;
 	private MainWindow mainWindow;
 	public boolean theme;
@@ -128,9 +128,19 @@ public class MainPanel extends JPanel {
 				updateTheme();
 			}
 		});
-		
+
+		addButton = new JButton("Add Changes");
+		addButton.addActionListener(new ActionListener() {
+			// on click, open the pull window and hide this one
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				addChanges();
+			}
+		});
+
 		otherButtonsJPanel.add(repoButton);
 		otherButtonsJPanel.add(themeButton);
+		otherButtonsJPanel.add(addButton);
 		this.add(otherButtonsJPanel);
 	}
 
@@ -138,6 +148,22 @@ public class MainPanel extends JPanel {
 	// in the constructor)
 	public void updateWindow() {
 		selectedUser.setText("Logged in as " + Driver.getUsername());
+	}
+
+	public void addChanges() {
+		try {
+			File repoFile = findRepoFile();
+			Scanner fileScan = new Scanner(repoFile);
+			String adds = "There are no changes to add to the commit";
+			// loop through any repos in the file and check for open pulls
+			while (fileScan.hasNext()) {
+				String filepath = fileScan.nextLine();
+				GitSubprocessClient finder = new GitSubprocessClient(filepath);
+				adds = finder.runGitCommand("add .");
+			}
+		} catch (FileNotFoundException e) {
+			pullRequestLabel.setText("There are no linked repos to search");
+		}
 	}
 
 	// updates the theme from light to dark when the user clicks the button
