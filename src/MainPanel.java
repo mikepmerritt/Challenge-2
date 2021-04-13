@@ -209,6 +209,8 @@ public class MainPanel extends JPanel {
 			selectedUser.setForeground(Color.darkGray);
 			titleLabel.setForeground(Color.darkGray);
 			pullRequestLabel.setForeground(Color.darkGray);
+			addCommitLabel.setForeground(Color.darkGray);
+			commitPanel.setBackground(Color.white);
 			if(!pullLabel.getForeground().equals(Color.red)) {
 				pullLabel.setForeground(Color.darkGray);
 			}
@@ -224,6 +226,14 @@ public class MainPanel extends JPanel {
 			themeButton.setForeground(Color.darkGray);
 			pullRequestRefreshButton.setBackground(defaultButtonColor);
 			pullRequestRefreshButton.setForeground(Color.darkGray);
+			commitButton.setBackground(defaultButtonColor);
+			commitButton.setForeground(Color.darkGray);
+			addButton.setBackground(defaultButtonColor);
+			addButton.setForeground(Color.darkGray);
+			commitLink.setBackground(Color.white);
+			commitLink.setForeground(Color.black);
+			commitMessage.setBackground(Color.white);
+			commitMessage.setForeground(Color.black);
 			
 			
 		} else {
@@ -236,6 +246,8 @@ public class MainPanel extends JPanel {
 			selectedUser.setForeground(Color.white);
 			titleLabel.setForeground(Color.white);
 			pullRequestLabel.setForeground(Color.white);
+			addCommitLabel.setForeground(Color.white);
+			commitPanel.setBackground(Color.darkGray);
 			if(!pullLabel.getForeground().equals(Color.red)) {
 				pullLabel.setForeground(Color.white);
 			}
@@ -251,6 +263,14 @@ public class MainPanel extends JPanel {
 			themeButton.setForeground(Color.white);
 			pullRequestRefreshButton.setBackground(Color.gray);
 			pullRequestRefreshButton.setForeground(Color.white);
+			commitButton.setBackground(Color.gray);
+			commitButton.setForeground(Color.white);
+			addButton.setBackground(Color.gray);
+			addButton.setForeground(Color.white);
+			commitLink.setBackground(Color.lightGray);
+			commitLink.setForeground(Color.white);
+			commitMessage.setBackground(Color.lightGray);
+			commitMessage.setForeground(Color.white);
 		}
 		mainWindow.getLinkRepoWindow().updateTheme(theme);
 	}
