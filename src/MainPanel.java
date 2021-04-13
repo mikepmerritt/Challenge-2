@@ -25,8 +25,8 @@ public class MainPanel extends JPanel {
 
 	// these components can change during runtime, so they can't be declared in the
 	// constructor like the others
-	private JLabel selectedUser, pullLabel, titleLabel, pullRequestLabel, addCommitLabel;
-	private JPanel titlePanel, pullPanel, pullButtons, otherButtonsJPanel, pullRequestPanel, commitPanel, commitFieldsPanel, commitButtonsPanel;
+	private JLabel selectedUser, pullLabel, titleLabel, pullRequestLabel, addCommitLabel, linkFailLabel;
+	private JPanel titlePanel, pullPanel, pullButtons, otherButtonsJPanel, pullRequestPanel, commitPanel, commitFieldsPanel, commitButtonsPanel, otherPanel;
 	public JButton refreshButton, resolveButton, repoButton, themeButton, pullRequestRefreshButton, addButton, commitButton;
 	public JTextField commitPath, commitMessage;
 	private GitHubApiClient gitHubApiClient;
@@ -140,6 +140,10 @@ public class MainPanel extends JPanel {
 		this.add(pullRequestPanel);
 		
 		// other buttons
+		otherPanel = new JPanel(new GridLayout(2, 1));
+		linkFailLabel = new JLabel("", SwingConstants.CENTER);
+		linkFailLabel.setForeground(Color.red);
+		
 		otherButtonsJPanel = new JPanel();
 		repoButton = new JButton("Link a repo");
 		repoButton.addActionListener(new ActionListener() {
@@ -162,16 +166,26 @@ public class MainPanel extends JPanel {
 			}
 		});
 
-
+		otherPanel.add(linkFailLabel);
 		otherButtonsJPanel.add(repoButton);
 		otherButtonsJPanel.add(themeButton);
-		this.add(otherButtonsJPanel);
+		otherPanel.add(otherButtonsJPanel);
+		this.add(otherPanel);
 	}
 
 	// this updates all of the components that can be updated (the ones not declared
 	// in the constructor)
 	public void updateWindow() {
 		selectedUser.setText("Logged in as " + Driver.getUsername());
+	}
+	
+	public void setLinkFailLabel(boolean fail) {
+		if(fail) {
+			linkFailLabel.setText("The last repo you tried to link was not a valid Git repository.");
+		}
+		else {
+			linkFailLabel.setText("");
+		}
 	}
 
 	public void addChanges() {
@@ -214,6 +228,7 @@ public class MainPanel extends JPanel {
 			pullPanel.setBackground(Color.white);
 			pullButtons.setBackground(Color.white);
 			otherButtonsJPanel.setBackground(Color.white);
+			otherPanel.setBackground(Color.white);
 			pullRequestPanel.setBackground(Color.white);
 			selectedUser.setForeground(Color.darkGray);
 			titleLabel.setForeground(Color.darkGray);
@@ -253,6 +268,7 @@ public class MainPanel extends JPanel {
 			pullPanel.setBackground(Color.darkGray);
 			pullButtons.setBackground(Color.darkGray);
 			otherButtonsJPanel.setBackground(Color.darkGray);
+			otherPanel.setBackground(Color.darkGray);
 			pullRequestPanel.setBackground(Color.darkGray);
 			selectedUser.setForeground(Color.white);
 			titleLabel.setForeground(Color.white);

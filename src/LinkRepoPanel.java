@@ -10,6 +10,8 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
+import git.tools.client.GitSubprocessClient;
+
 public class LinkRepoPanel extends JPanel {
 	
 	private JLabel filePathInstructions;
@@ -23,16 +25,22 @@ public class LinkRepoPanel extends JPanel {
 		enterButton = new JButton("Save and Submit");
 		enterButton.addActionListener(new ActionListener() {
 			// on click, the button should writes the user's specified repo file path to a
-			// file
+			// file, or say that it failed on the main screen and write nothing
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				try {
+					GitSubprocessClient pathCheck = new GitSubprocessClient(fileField.getText());
+					pathCheck.runGitCommand("status");
 					PrintWriter output = new PrintWriter(new FileOutputStream("repo.txt", true));
 					output.println(fileField.getText());
 					output.close();
+					mainWindow.setLinkFailLabel(false);
 				} catch (FileNotFoundException ex) {
 					System.out.println(
 							"An error occurred, exiting program. Please manually add your repo to a file named \"repo.txt\" in the correct folder.");
+				} catch (RuntimeException exc) {
+					// bad path, so nothing gets written
+					mainWindow.setLinkFailLabel(true);
 				}
 				linkRepoWindow.setVisibility(false);
 			}
