@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.Scanner;
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -16,6 +17,8 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 
+import github.tools.client.GitHubApiClient;
+import github.tools.client.QueryParams;
 import git.tools.client.GitSubprocessClient;
 import github.tools.client.GitHubApiClient;
 import github.tools.client.QueryParams;
@@ -25,9 +28,9 @@ public class MainPanel extends JPanel {
 
 	// these components can change during runtime, so they can't be declared in the
 	// constructor like the others
-	private JLabel selectedUser, pullLabel, titleLabel;
-	private JPanel titlePanel, pullPanel, pullButtons, otherButtonsJPanel;
-	public JButton refreshButton, resolveButton, repoButton, themeButton;
+	private JLabel selectedUser, pullLabel, titleLabel, pullRequestLabel;
+	private JPanel titlePanel, pullPanel, pullButtons, otherButtonsJPanel, pullRequestPanel;
+	public JButton refreshButton, resolveButton, repoButton, themeButton, pullRequestRefreshButton;
 	private GitHubApiClient gitHubApiClient;
 	private MainWindow mainWindow;
 	public boolean theme;
@@ -58,9 +61,10 @@ public class MainPanel extends JPanel {
 		pullLabel.setHorizontalAlignment(JLabel.CENTER);
 		pullLabel.setForeground(Color.black);
 		// checkLocalRepositoriesForPulls();
-		pullButtons = new JPanel();
 
+		pullButtons = new JPanel();
 		refreshButton = new JButton("Refresh");
+
 		refreshButton.addActionListener(new ActionListener() {
 			// on click, check the repositories again
 			@Override
@@ -86,7 +90,22 @@ public class MainPanel extends JPanel {
 		this.add(pullPanel);
 
 		// pull request alert
-
+		pullRequestPanel = new JPanel();
+		pullRequestLabel = new JLabel("Check for open pull requests");
+		pullRequestLabel.setHorizontalAlignment(JLabel.CENTER);
+		pullRequestRefreshButton = new JButton("Refresh");
+		pullRequestRefreshButton.addActionListener(new ActionListener() {
+			// on click, check the pull requests again  again
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				pullRequest();
+			}
+		});
+		
+		pullRequestPanel.add(pullRequestLabel);
+		pullRequestPanel.add(pullRequestRefreshButton);
+		this.add(pullRequestPanel);
+		
 		// other buttons
 		otherButtonsJPanel = new JPanel();
 		repoButton = new JButton("Link a repo");
@@ -131,8 +150,10 @@ public class MainPanel extends JPanel {
 			pullPanel.setBackground(Color.white);
 			pullButtons.setBackground(Color.white);
 			otherButtonsJPanel.setBackground(Color.white);
+			pullRequestPanel.setBackground(Color.white);
 			selectedUser.setForeground(Color.darkGray);
 			titleLabel.setForeground(Color.darkGray);
+			pullRequestLabel.setForeground(Color.darkGray);
 			if(!pullLabel.getForeground().equals(Color.red)) {
 				pullLabel.setForeground(Color.darkGray);
 			}
@@ -146,6 +167,8 @@ public class MainPanel extends JPanel {
 			repoButton.setForeground(Color.darkGray);
 			themeButton.setBackground(defaultButtonColor);
 			themeButton.setForeground(Color.darkGray);
+			pullRequestRefreshButton.setBackground(defaultButtonColor);
+			pullRequestRefreshButton.setForeground(Color.darkGray);
 			
 			
 		} else {
@@ -154,8 +177,10 @@ public class MainPanel extends JPanel {
 			pullPanel.setBackground(Color.darkGray);
 			pullButtons.setBackground(Color.darkGray);
 			otherButtonsJPanel.setBackground(Color.darkGray);
+			pullRequestPanel.setBackground(Color.darkGray);
 			selectedUser.setForeground(Color.white);
 			titleLabel.setForeground(Color.white);
+			pullRequestLabel.setForeground(Color.white);
 			if(!pullLabel.getForeground().equals(Color.red)) {
 				pullLabel.setForeground(Color.white);
 			}
@@ -169,6 +194,8 @@ public class MainPanel extends JPanel {
 			repoButton.setForeground(Color.white);
 			themeButton.setBackground(Color.gray);
 			themeButton.setForeground(Color.white);
+			pullRequestRefreshButton.setBackground(Color.gray);
+			pullRequestRefreshButton.setForeground(Color.white);
 		}
 		mainWindow.getLinkRepoWindow().updateTheme(theme);
 	}
@@ -177,6 +204,37 @@ public class MainPanel extends JPanel {
 		public void setGitHubApiClient(GitHubApiClient gitHubApiClient) {
 			this.gitHubApiClient = gitHubApiClient;
 		}
+
+	// this checks the repos for open pull requests and updates the label 
+	public void pullRequest() {
+		// used to only get the open pull requests 
+		QueryParams queryParams = new QueryParams();
+		queryParams.addParam("state", "open");
+		// try catch to make sure it only checks the repo file if it is there 
+		try {
+			File repoFile = findRepoFile();
+			Scanner fileScan = new Scanner(repoFile);
+			String pulls = "There are no open pull requests";
+			// loop through any repos in the file and check for open pulls 
+			while (fileScan.hasNext()) {
+				String filepath = fileScan.nextLine();
+				ListPullRequestsResponse listPullRequestsResponse = gitHubApiClient.listPullRequests(getRepoOwner(filepath), getRepoName(filepath).trim(), queryParams);
+				ArrayList<PullRequest> openPullRequests = listPullRequestsResponse.getPullRequests();
+				// if there are open pulls, displays to the user 
+				if (openPullRequests.size() > 0) {
+					pulls = "There are open pull requests on the repo " + getRepoName(filepath) + ": ";
+					for (int i = 0; i < openPullRequests.size(); i++) {
+						pulls = pulls + openPullRequests.get(i).getTitle() + " ";
+					}
+				}
+			}
+			pullRequestLabel.setText(pulls);
+			fileScan.close();
+
+		} catch (FileNotFoundException e) {
+			pullRequestLabel.setText("There are no linked repos to search");
+		}
+	}
 
 	// given a local repository, find the username of the owner
 	// this name, along with the name of the repo (see getRepoName(String
@@ -202,6 +260,18 @@ public class MainPanel extends JPanel {
 		commandResult = commandResult.replace(".git\n", "");
 		commandResult = commandResult.substring(commandResult.indexOf("/") + 1);
 		return commandResult;
+	}
+
+	// action listener for the linking repo button
+	public void repoButtonListener(JButton repoButton) {
+		repoButton.addActionListener(new ActionListener() {
+			// on click, the button should the setup window, and try connecting the user
+			// again
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				Driver.updateLinkRepoVisibility(theme);
+			}
+		});
 	}
 
 	public void checkLocalRepositoriesForPulls() {
