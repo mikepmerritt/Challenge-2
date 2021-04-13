@@ -44,4 +44,9 @@ public class MainWindow extends JFrame {
 		mainPanel.updateWindow();
 		this.setVisible(visibility);
 	}
+	
+	// updates the fail label if a repo was bad, this function is used in LinkRepoPanel
+	public void setLinkFailLabel(boolean fail) {
+		mainPanel.setLinkFailLabel(fail);
+	}
 }
