@@ -12,10 +12,7 @@ import java.util.Scanner;
 import java.awt.BorderLayout;
 import java.awt.Color;
 
-import javax.swing.JButton;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.SwingConstants;
+import javax.swing.*;
 
 import github.tools.client.GitHubApiClient;
 import github.tools.client.QueryParams;
@@ -28,16 +25,17 @@ public class MainPanel extends JPanel {
 
 	// these components can change during runtime, so they can't be declared in the
 	// constructor like the others
-	private JLabel selectedUser, pullLabel, titleLabel, pullRequestLabel;
-	private JPanel titlePanel, pullPanel, pullButtons, otherButtonsJPanel, pullRequestPanel;
-	public JButton refreshButton, resolveButton, repoButton, themeButton, pullRequestRefreshButton;
+	private JLabel selectedUser, pullLabel, titleLabel, pullRequestLabel, addCommitLabel;
+	private JPanel titlePanel, pullPanel, pullButtons, otherButtonsJPanel, pullRequestPanel, commitPanel;
+	public JButton refreshButton, resolveButton, repoButton, themeButton, pullRequestRefreshButton, addButton, commitButton;
+	public JTextField commitPath, commitMessage;
 	private GitHubApiClient gitHubApiClient;
 	private MainWindow mainWindow;
 	public boolean theme;
 
 	// set up the panel and its components
 	public MainPanel(MainWindow mainWindow) {
-		super(new GridLayout(5, 1));
+		super(new GridLayout(6, 1));
 		this.setPreferredSize(new Dimension(400, 600));
 		this.mainWindow = mainWindow;
 		theme = false; // dark mode is off by default
@@ -53,7 +51,31 @@ public class MainPanel extends JPanel {
 		titlePanel.add(selectedUser, BorderLayout.SOUTH);
 
 		this.add(titlePanel);
+
 		// commit alert
+		commitPanel = new JPanel(new GridLayout(5,1));
+		commitButton = new JButton("Commit changes");
+		commitPath = new JTextField("Put repo filepath here",25);
+		commitMessage = new JTextField("Put commit message here", 25);
+		addCommitLabel = new JLabel("");
+		addCommitLabel.setHorizontalAlignment(JLabel.CENTER);
+		commitButton.addActionListener(new ActionListener() {
+			// on click, check the repositories again
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				addCommitLabel.setText("Checking all added repos...");
+				commitChanges(commitPath.getText(), commitMessage.getText());
+			}
+		});
+		addButton = new JButton("Add Changes");
+		addButton.addActionListener(new ActionListener() {
+			// on click, open the pull window and hide this one
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				addChanges();
+			}
+		});
+
 
 		// pull alert
 		pullPanel = new JPanel(new GridLayout(2, 1));
@@ -128,16 +150,54 @@ public class MainPanel extends JPanel {
 				updateTheme();
 			}
 		});
-		
+
+
 		otherButtonsJPanel.add(repoButton);
 		otherButtonsJPanel.add(themeButton);
 		this.add(otherButtonsJPanel);
+
+		commitPanel.add(addCommitLabel);
+		commitPanel.add(addButton);
+		commitPanel.add(commitPath);
+		commitPanel.add(commitMessage);
+		commitPanel.add(commitButton);
+		this.add(commitPanel);
 	}
 
 	// this updates all of the components that can be updated (the ones not declared
 	// in the constructor)
 	public void updateWindow() {
 		selectedUser.setText("Logged in as " + Driver.getUsername());
+	}
+
+	public void addChanges() {
+		try {
+			File repoFile = findRepoFile();
+			Scanner fileScan = new Scanner(repoFile);
+			// loop through any repos in the file and check for open pulls
+			while (fileScan.hasNext()) {
+				String filepath = fileScan.nextLine();
+				GitSubprocessClient finder = new GitSubprocessClient(filepath);
+				finder.runGitCommand("add .");
+			}
+			addCommitLabel.setText("All changes have been added.");
+		} catch (FileNotFoundException e) {
+			addCommitLabel.setText("Cannot add: there are no linked repos to search.");
+		}
+	}
+
+	public void commitChanges(String repoLink, String commitMessage) {
+		try {
+			GitSubprocessClient finder = new GitSubprocessClient(repoLink);
+			String resultMessage = finder.runGitCommand("commit -m \"" + commitMessage + "\"");
+			if (resultMessage.contains("no changes added to commit")) {
+				addCommitLabel.setText("No changes have been added to the commit.");
+			} else if (resultMessage.contains("nothing to commit")) {
+				addCommitLabel.setText("There are no changes to commit.");
+			} else addCommitLabel.setText("All changes have been committed.");
+		} catch (Exception e) {
+			addCommitLabel.setText("Cannot commit: The repo filepath is not valid.");
+		}
 	}
 
 	// updates the theme from light to dark when the user clicks the button
@@ -154,6 +214,8 @@ public class MainPanel extends JPanel {
 			selectedUser.setForeground(Color.darkGray);
 			titleLabel.setForeground(Color.darkGray);
 			pullRequestLabel.setForeground(Color.darkGray);
+			addCommitLabel.setForeground(Color.darkGray);
+			commitPanel.setBackground(Color.white);
 			if(!pullLabel.getForeground().equals(Color.red)) {
 				pullLabel.setForeground(Color.darkGray);
 			}
@@ -169,6 +231,14 @@ public class MainPanel extends JPanel {
 			themeButton.setForeground(Color.darkGray);
 			pullRequestRefreshButton.setBackground(defaultButtonColor);
 			pullRequestRefreshButton.setForeground(Color.darkGray);
+			commitButton.setBackground(defaultButtonColor);
+			commitButton.setForeground(Color.darkGray);
+			addButton.setBackground(defaultButtonColor);
+			addButton.setForeground(Color.darkGray);
+			commitPath.setBackground(Color.white);
+			commitPath.setForeground(Color.black);
+			commitMessage.setBackground(Color.white);
+			commitMessage.setForeground(Color.black);
 			
 			
 		} else {
@@ -181,6 +251,8 @@ public class MainPanel extends JPanel {
 			selectedUser.setForeground(Color.white);
 			titleLabel.setForeground(Color.white);
 			pullRequestLabel.setForeground(Color.white);
+			addCommitLabel.setForeground(Color.white);
+			commitPanel.setBackground(Color.darkGray);
 			if(!pullLabel.getForeground().equals(Color.red)) {
 				pullLabel.setForeground(Color.white);
 			}
@@ -196,6 +268,14 @@ public class MainPanel extends JPanel {
 			themeButton.setForeground(Color.white);
 			pullRequestRefreshButton.setBackground(Color.gray);
 			pullRequestRefreshButton.setForeground(Color.white);
+			commitButton.setBackground(Color.gray);
+			commitButton.setForeground(Color.white);
+			addButton.setBackground(Color.gray);
+			addButton.setForeground(Color.white);
+			commitPath.setBackground(Color.lightGray);
+			commitPath.setForeground(Color.white);
+			commitMessage.setBackground(Color.lightGray);
+			commitMessage.setForeground(Color.white);
 		}
 		mainWindow.getLinkRepoWindow().updateTheme(theme);
 	}
