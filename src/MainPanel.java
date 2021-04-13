@@ -28,21 +28,23 @@ public class MainPanel extends JPanel {
 
 	// these components can change during runtime, so they can't be declared in the
 	// constructor like the others
-
-	private JLabel selectedUser, pullRequestLabel;
-	private JLabel pullLabel;
+	private JLabel selectedUser, pullLabel, titleLabel, pullRequestLabel;
+	private JPanel titlePanel, pullPanel, pullButtons, otherButtonsJPanel, pullRequestPanel;
+	public JButton refreshButton, resolveButton, repoButton, themeButton, pullRequestRefreshButton;
 	private GitHubApiClient gitHubApiClient;
 	private MainWindow mainWindow;
+	public boolean theme;
 
 	// set up the panel and its components
 	public MainPanel(MainWindow mainWindow) {
 		super(new GridLayout(5, 1));
 		this.setPreferredSize(new Dimension(400, 600));
 		this.mainWindow = mainWindow;
+		theme = false; // dark mode is off by default
 
 		// title text
-		JPanel titlePanel = new JPanel(new BorderLayout());
-		JLabel titleLabel = new JLabel("GitHub Helper");
+		titlePanel = new JPanel(new BorderLayout());
+		titleLabel = new JLabel("GitHub Helper");
 		titleLabel.setFont(new Font("Arial", Font.PLAIN, 32));
 		titleLabel.setHorizontalAlignment(JLabel.CENTER);
 		selectedUser = new JLabel("Logged in as " + Driver.getUsername());
@@ -54,13 +56,15 @@ public class MainPanel extends JPanel {
 		// commit alert
 
 		// pull alert
-		JPanel pullPanel = new JPanel(new GridLayout(2, 1));
+		pullPanel = new JPanel(new GridLayout(2, 1));
 		pullLabel = new JLabel("Check to see if your added repos are up to date.", SwingConstants.CENTER);
 		pullLabel.setHorizontalAlignment(JLabel.CENTER);
 		pullLabel.setForeground(Color.black);
 		// checkLocalRepositoriesForPulls();
-		JPanel pullButtons = new JPanel();
-		JButton refreshButton = new JButton("Refresh");
+
+		pullButtons = new JPanel();
+		refreshButton = new JButton("Refresh");
+
 		refreshButton.addActionListener(new ActionListener() {
 			// on click, check the repositories again
 			@Override
@@ -69,7 +73,7 @@ public class MainPanel extends JPanel {
 				checkLocalRepositoriesForPulls();
 			}
 		});
-		JButton resolveButton = new JButton("Pull down changes");
+		resolveButton = new JButton("Pull down changes");
 		resolveButton.addActionListener(new ActionListener() {
 			// on click, open the pull window and hide this one
 			@Override
@@ -86,10 +90,10 @@ public class MainPanel extends JPanel {
 		this.add(pullPanel);
 
 		// pull request alert
-		JPanel pullRequestPanel = new JPanel();
+		pullRequestPanel = new JPanel();
 		pullRequestLabel = new JLabel("Check for open pull requests");
 		pullRequestLabel.setHorizontalAlignment(JLabel.CENTER);
-		JButton pullRequestRefreshButton = new JButton("Refresh");
+		pullRequestRefreshButton = new JButton("Refresh");
 		pullRequestRefreshButton.addActionListener(new ActionListener() {
 			// on click, check the pull requests again  again
 			@Override
@@ -97,17 +101,37 @@ public class MainPanel extends JPanel {
 				pullRequest();
 			}
 		});
-
-		// other buttons
 		
-		// button to link the repository 
-		JButton repoButton = new JButton("Link a repo");
-		repoButtonListener(repoButton);
 		pullRequestPanel.add(pullRequestLabel);
 		pullRequestPanel.add(pullRequestRefreshButton);
-		this.add(repoButton);
-		
 		this.add(pullRequestPanel);
+		
+		// other buttons
+		otherButtonsJPanel = new JPanel();
+		repoButton = new JButton("Link a repo");
+		repoButton.addActionListener(new ActionListener() {
+			// on click, the button should the setup window, and try connecting the user
+			// again
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// when the button is clicked to open the new window, the theme setting is also
+				// passed in
+				Driver.updateLinkRepoVisibility(theme);
+			}
+		});
+
+		themeButton = new JButton("Theme");
+		themeButton.addActionListener(new ActionListener() {
+			// on click, open the pull window and hide this one
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				updateTheme();
+			}
+		});
+		
+		otherButtonsJPanel.add(repoButton);
+		otherButtonsJPanel.add(themeButton);
+		this.add(otherButtonsJPanel);
 	}
 
 	// this updates all of the components that can be updated (the ones not declared
@@ -115,6 +139,71 @@ public class MainPanel extends JPanel {
 	public void updateWindow() {
 		selectedUser.setText("Logged in as " + Driver.getUsername());
 	}
+
+	// updates the theme from light to dark when the user clicks the button
+	public void updateTheme() {
+		if (theme) {
+			Color defaultButtonColor = new JButton().getBackground();
+			
+			this.setBackground(Color.white);
+			titlePanel.setBackground(Color.white);
+			pullPanel.setBackground(Color.white);
+			pullButtons.setBackground(Color.white);
+			otherButtonsJPanel.setBackground(Color.white);
+			pullRequestPanel.setBackground(Color.white);
+			selectedUser.setForeground(Color.darkGray);
+			titleLabel.setForeground(Color.darkGray);
+			pullRequestLabel.setForeground(Color.darkGray);
+			if(!pullLabel.getForeground().equals(Color.red)) {
+				pullLabel.setForeground(Color.darkGray);
+			}
+			theme = false;
+			
+			refreshButton.setBackground(defaultButtonColor);
+			refreshButton.setForeground(Color.darkGray);
+			resolveButton.setBackground(defaultButtonColor);
+			resolveButton.setForeground(Color.darkGray);
+			repoButton.setBackground(defaultButtonColor);
+			repoButton.setForeground(Color.darkGray);
+			themeButton.setBackground(defaultButtonColor);
+			themeButton.setForeground(Color.darkGray);
+			pullRequestRefreshButton.setBackground(defaultButtonColor);
+			pullRequestRefreshButton.setForeground(Color.darkGray);
+			
+			
+		} else {
+			this.setBackground(Color.darkGray);
+			titlePanel.setBackground(Color.darkGray);
+			pullPanel.setBackground(Color.darkGray);
+			pullButtons.setBackground(Color.darkGray);
+			otherButtonsJPanel.setBackground(Color.darkGray);
+			pullRequestPanel.setBackground(Color.darkGray);
+			selectedUser.setForeground(Color.white);
+			titleLabel.setForeground(Color.white);
+			pullRequestLabel.setForeground(Color.white);
+			if(!pullLabel.getForeground().equals(Color.red)) {
+				pullLabel.setForeground(Color.white);
+			}
+			theme = true;
+			
+			refreshButton.setBackground(Color.gray);
+			refreshButton.setForeground(Color.white);
+			resolveButton.setBackground(Color.gray);
+			resolveButton.setForeground(Color.white);
+			repoButton.setBackground(Color.gray);
+			repoButton.setForeground(Color.white);
+			themeButton.setBackground(Color.gray);
+			themeButton.setForeground(Color.white);
+			pullRequestRefreshButton.setBackground(Color.gray);
+			pullRequestRefreshButton.setForeground(Color.white);
+		}
+		mainWindow.getLinkRepoWindow().updateTheme(theme);
+	}
+	
+	// get an instance of the GitHubApiClient we made earlier so we can use it later
+		public void setGitHubApiClient(GitHubApiClient gitHubApiClient) {
+			this.gitHubApiClient = gitHubApiClient;
+		}
 
 	// this checks the repos for open pull requests and updates the label 
 	public void pullRequest() {
@@ -145,11 +234,6 @@ public class MainPanel extends JPanel {
 		} catch (FileNotFoundException e) {
 			pullRequestLabel.setText("There are no linked repos to search");
 		}
-	}
-
-	// get an instance of the GitHubApiClient we made earlier so we can use it later
-	public void setGitHubApiClient(GitHubApiClient gitHubApiClient) {
-		this.gitHubApiClient = gitHubApiClient;
 	}
 
 	// given a local repository, find the username of the owner
@@ -185,13 +269,18 @@ public class MainPanel extends JPanel {
 			// again
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				Driver.updateLinkRepoVisibility();
+				Driver.updateLinkRepoVisibility(theme);
 			}
 		});
 	}
 
 	public void checkLocalRepositoriesForPulls() {
-		pullLabel.setForeground(Color.black);
+		if(theme) {
+			pullLabel.setForeground(Color.white);
+		}
+		else {
+			pullLabel.setForeground(Color.black);
+		}
 		pullLabel.setText("Checking all added repos...");
 		pullLabel.paintImmediately(pullLabel.getVisibleRect());
 		boolean pullNeeded = false;
@@ -231,13 +320,23 @@ public class MainPanel extends JPanel {
 			pullLabel.setForeground(Color.red);
 			pullLabel.setText("One of your local repositories is out of date!");
 		} else {
-			pullLabel.setForeground(Color.black);
+			if(theme) {
+				pullLabel.setForeground(Color.white);
+			}
+			else {
+				pullLabel.setForeground(Color.black);
+			}
 			pullLabel.setText("Your local repositories appear to be up to date.");
 		}
 	}
 
 	public void pullAllRepositories() {
-		pullLabel.setForeground(Color.black);
+		if(theme) {
+			pullLabel.setForeground(Color.white);
+		}
+		else {
+			pullLabel.setForeground(Color.black);
+		}
 		pullLabel.setText("Pulling all added repos...");
 		pullLabel.paintImmediately(pullLabel.getVisibleRect());
 		boolean mergeConflictExists = false; // flag for the first merge conflict
@@ -272,7 +371,12 @@ public class MainPanel extends JPanel {
 						+ mergeConflictList + "</body></html>";
 				pullLabel.setText(mergeFailedMessage);
 			} else {
-				pullLabel.setForeground(Color.black);
+				if(theme) {
+					pullLabel.setForeground(Color.white);
+				}
+				else {
+					pullLabel.setForeground(Color.black);
+				}
 				pullLabel.setText("Your local repositories are now up to date.");
 			}
 		} catch (FileNotFoundException e) {

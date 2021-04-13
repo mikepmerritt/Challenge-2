@@ -6,7 +6,9 @@ public class MainWindow extends JFrame {
 	
 	private MainPanel mainPanel;
 	private GitHubApiClient gitHubApiClient;
-	
+	public boolean theme;
+	private LinkRepoWindow linkRepoWindow;
+
 	// make the window
 	public MainWindow() {
 		super("GitHub Helper");
@@ -21,6 +23,16 @@ public class MainWindow extends JFrame {
 	public void setGitHubApiClient(GitHubApiClient gitHubApiClient) {
 		this.gitHubApiClient = gitHubApiClient;
 		mainPanel.setGitHubApiClient(gitHubApiClient);
+	}
+	
+	// set an instance of the LinkRepoWindow we made earlier so we can recolor it
+	public void setLinkRepoWindow(LinkRepoWindow linkRepoWindow) {
+		this.linkRepoWindow = linkRepoWindow;
+	}
+	
+	// get an instance of the LinkRepoWindow we made earlier so we can recolor it
+	public LinkRepoWindow getLinkRepoWindow() {
+		return linkRepoWindow;
 	}
 	
 	public GitHubApiClient getGitHubApiClient() {

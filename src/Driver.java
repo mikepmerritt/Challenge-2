@@ -20,6 +20,7 @@ public class Driver {
 		linkRepoWindow = new LinkRepoWindow(mainWindow);
 		gitHubApiClient = connectUser(mainWindow, setupWindow);
 		mainWindow.setGitHubApiClient(gitHubApiClient);
+		mainWindow.setLinkRepoWindow(linkRepoWindow);
 	}
 	
 	// used to locate the credential file (token.txt) in the project
@@ -66,9 +67,10 @@ public class Driver {
 		return gitHubApiClient;
 	}
 	
-	// sets the linkRepo Window to visible when the button is pressed in the main panel 
-	public static void updateLinkRepoVisibility() {
+	// sets the linkRepo Window to visible when the button is pressed in the main panel and passes through the theme
+	public static void updateLinkRepoVisibility(boolean theme) {
 		linkRepoWindow.setVisibility(true);
+		linkRepoWindow.updateTheme(theme);
 	}
 }
 
