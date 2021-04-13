@@ -17,6 +17,6 @@
 #### What do I do once I am in the main menu?
 From here, you have several options:
 - You can link a new repository by clicking the link repo button and inserting the filepath of your repository
-- You can add all changes and push to a specific branch
+- You can add all changes and commit to a specific repo
 - You can see if your local repository is up to date
 - You can see if there are any pending pull requests
